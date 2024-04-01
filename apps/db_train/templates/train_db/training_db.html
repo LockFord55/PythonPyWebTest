@@ -65,7 +65,7 @@
     {% for answer in answer6 %}
     <ul>
     <li>
-        Автор: <span style="color: red">{{ answer.username }}</span>
+        Автор: <span style="color: red">{{ answer.author }}</span>
     </li>
     </ul>
     {% endfor %}
@@ -106,7 +106,7 @@
     {% for answer in answer10 %}
     <ul>
     <li>
-        Автор: <span style="color: red">{{ answer.username }}</span>; Число статей: <span style="color: red">{{ answer.count }}</span>
+        Автор: <span style="color: red">{{ answer.author__username }}</span>; Число статей: <span style="color: red">{{ answer.count }}</span>
     </li>
     </ul>
     {% endfor %}

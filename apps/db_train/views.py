@@ -13,12 +13,12 @@ class TrainView(View):
 
         # Какой автор имеет наибольшее количество опубликованных статей?
         # TODO Нет результата
-        # answer_2 = Entry.objects.values('author', 'text').annotate(Count('text'))
-        self.answer2 = None
+        author_book_counter = Author.objects.annotate(entry_count=Count('entries')).order_by('-entry_count')[:1]
+        self.answer2 = author_book_counter
 
-        # Какие статьи содержат тег 'Кино' или 'Музыка'? TODO Нет результата
-        # answer_3 = Entry.objects.filter(Q(tags__icontains='Кино')|Q(tags__icontains='Музыка'))
-        self.answer3 = None
+        # Какие статьи содержат тег 'Кино' или 'Музыка'?
+        answer_3 = Entry.objects.filter(Q(tags__name__contains='Кино') | Q(tags__name__contains='Музыка'))
+        self.answer3 = answer_3.distinct()
 
         # Сколько авторов женского пола зарегистрировано в системе?
         gender = Author.objects.filter(gender__contains='ж').count()
@@ -29,7 +29,7 @@ class TrainView(View):
         all = Author.objects.all()
         self.answer5 = f"{(agreed.count() * 100 / all.count()):.1f}%"
 
-        # Какие авторы имеют стаж от 1 до 5 лет? TODO Что-то не так
+        # Какие авторы имеют стаж от 1 до 5 лет?
         answer_6 = AuthorProfile.objects.filter(
             Q(stage__gte=1) & Q(stage__lte=5)
         )
@@ -46,8 +46,9 @@ class TrainView(View):
         # Какие авторы имеют возраст младше 25 лет?
         self.answer9 = Author.objects.filter(age__lt=25)
 
-        # Сколько статей написано каждым автором? TODO Что-то не так
-        self.answer10 = Entry.objects.values('author').annotate(Count('id'))
+        # Сколько статей написано каждым автором?
+        # entry_counter = Author.objects.annotate(entry_count=Count('entries'))
+        self.answer10 = Entry.objects.values('author__username').annotate(count=Count('text'))
 
         context = {f'answer{index}': self.__dict__[f'answer{index}'] for index in range(1, 11)}  # Создайте здесь запросы к БД
 
