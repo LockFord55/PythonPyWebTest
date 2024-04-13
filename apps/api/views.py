@@ -5,17 +5,22 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from apps.db_train_alternative.models import Author
 from .serializers import AuthorSerializer
+
 # Импорты ниже были использованы для GenericAPIView
-from django.http import Http404
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import RetrieveModelMixin, ListModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from .serializers import AuthorModelSerializer
 from django.http import Http404
+
 # Импорты ниже были использованы для ModelViewSet
 from rest_framework.viewsets import ModelViewSet
+
 # Импорты для пользовательской логики
 from rest_framework.decorators import action
 # from rest_framework.response import Response снова
+
+# Импорты для пагинации
+from rest_framework.pagination import PageNumberPagination
 
 
 class AuthorAPIView(APIView):
@@ -109,12 +114,21 @@ class AuthorGenericAPIView(GenericAPIView, RetrieveModelMixin,
         return self.destroy(request, *args, **kwargs)
 
 
+# Отдельный класс для пагинации
+class AuthorPagination(PageNumberPagination):
+    page_size = 5  # количество объектов на странице
+    page_size_query_param = 'page_size'  # параметр запроса для настройки кол-ва объектов на странице
+    max_page_size = 1000  # максимальное количество объектов на странице
+
+
 # ViewSet, если точнее ModelViewSet
 class AuthorViewSet(ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorModelSerializer
     # Если необходимо ограничить методы:
     http_method_names = ['get', 'post']
+    # Подключаем пагинацию
+    pagination_class = AuthorPagination
 
     # Следующий этап - написания пользовательской логики
     @action(detail=True, methods=['post'])
