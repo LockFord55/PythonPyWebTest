@@ -1,16 +1,21 @@
+# Импорты ниже были использованы для APIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from apps.db_train_alternative.models import Author
 from .serializers import AuthorSerializer
-# Импорты выше были использованы для APIView
 # Импорты ниже были использованы для GenericAPIView
 from django.http import Http404
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import RetrieveModelMixin, ListModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from .serializers import AuthorModelSerializer
 from django.http import Http404
+# Импорты ниже были использованы для ModelViewSet
+from rest_framework.viewsets import ModelViewSet
+# Импорты для пользовательской логики
+from rest_framework.decorators import action
+# from rest_framework.response import Response снова
 
 
 class AuthorAPIView(APIView):
@@ -102,3 +107,17 @@ class AuthorGenericAPIView(GenericAPIView, RetrieveModelMixin,
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+# ViewSet, если точнее ModelViewSet
+class AuthorViewSet(ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = AuthorModelSerializer
+    # Если необходимо ограничить методы:
+    http_method_names = ['get', 'post']
+
+    # Следующий этап - написания пользовательской логики
+    @action(detail=True, methods=['post'])
+    def my_action(self, request, pk=None):
+        # Пользовательская логика описана здесь
+        return Response({'message': f'Пользовательская функция для пользователя с pk={pk}'})
