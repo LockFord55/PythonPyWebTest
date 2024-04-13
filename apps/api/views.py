@@ -22,6 +22,12 @@ from rest_framework.decorators import action
 # Импорты для пагинации
 from rest_framework.pagination import PageNumberPagination
 
+# Импорты для django-filters
+from django_filters.rest_framework import DjangoFilterBackend
+
+# Импорт встроенных фильтров django
+from rest_framework import filters
+
 
 class AuthorAPIView(APIView):
     @csrf_exempt
@@ -129,6 +135,21 @@ class AuthorViewSet(ModelViewSet):
     http_method_names = ['get', 'post']
     # Подключаем пагинацию
     pagination_class = AuthorPagination
+    # Подключаем django_filters
+    # [, filters.SearchFilter, filters.OrderingFilter] - подключенные встроенные фильтры
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['name', 'email']  # Указываем для каких полем можем проводить фильтрацию
+    # Встроенные фильтры django:
+    search_fields = ['email']  # Поля, по которым будет выполняться поиск
+    ordering_fields = ['name', 'email']  # Поля, по которым можно сортировать
+
+    # Фильтрация по имени:
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__contains=name)
+        return queryset
 
     # Следующий этап - написания пользовательской логики
     @action(detail=True, methods=['post'])
