@@ -4,6 +4,13 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from apps.db_train_alternative.models import Author
 from .serializers import AuthorSerializer
+# Импорты выше были использованы для APIView
+# Импорты ниже были использованы для GenericAPIView
+from django.http import Http404
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import RetrieveModelMixin, ListModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
+from .serializers import AuthorModelSerializer
+from django.http import Http404
 
 
 class AuthorAPIView(APIView):
@@ -63,3 +70,35 @@ class AuthorAPIView(APIView):
 
         author.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Аналог AuthorAPIView, но через generics и mixins
+class AuthorGenericAPIView(GenericAPIView, RetrieveModelMixin,
+                           ListModelMixin, CreateModelMixin,
+                           UpdateModelMixin, DestroyModelMixin):
+    # Необходимо в точности указывать эти атрибуты, т.к. на них завязаны миксины
+    queryset = Author.objects.all()
+    serializer_class = AuthorModelSerializer
+
+    def get(self, request, *args, **kwargs):
+        if kwargs.get(self.lookup_field):  # если был передан id или pk
+            try:
+                # возвращаем один объект
+                return self.retrieve(request, *args, **kwargs)
+            except Http404:
+                return Response({'message': 'Автор не найден!'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # Иначе возвращаем список объектов
+            return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
