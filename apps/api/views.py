@@ -30,6 +30,8 @@ from rest_framework import filters
 
 # Аутентификация
 from rest_framework import permissions
+from rest_framework import authentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class AuthorAPIView(APIView):
@@ -124,6 +126,7 @@ class AuthorGenericAPIView(GenericAPIView, RetrieveModelMixin,
 
     # Переопределяем атрибут permission_classes для указания нашего собственного разрешения
     permission_classes = [CustomPermission]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, *args, **kwargs):
         if kwargs.get(self.lookup_field):  # если был передан id или pk
